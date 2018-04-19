@@ -1,125 +1,82 @@
 # coding: utf-8
 
 import requests
-import json
-import classe_API
-import classe_db
-from module.classe_API import category, Aliment
 from module.classe_db import DataBaseConnection
-import pymysql
-import pymysql.cursors
+from module.classe_API import Category,Aliment
 
 
 
 page = True
-
-
 separator = 20 # page 1 to start
 
-
-r = requests.get('https://fr.openfoodfacts.org/categories.json')
-
-return_json_API = r.json()#get json file
-number_produit = return_json_API["count"]#a supprimer
-
+##connect to openfoodfact to get list of categorie
+##//fr => will be in french
+request = requests.get('https://fr.openfoodfacts.org/categories.json')
+return_json_API = request.json()#get json file
 
 
+number_category = return_json_API["count"]#gives how many category - note used at the moment
+product_JSON = return_json_API["tags"]#will be a list [] of dico with all categories with details (id, names,..)
+list_category_limited = []##a supprimer
 
-product_JSON = return_json_API["tags"]#get the list of product itself from JSON
-print(type(product_JSON))##a supprimer
-#print(product_JSON[0])
 
-list_cate_500 = []##a supprimer
+
 
 for category in product_JSON:
+#filter to get only category with a limited number of product (20 and 30).
 
-
-    product_dico = dict(category)
+    product_dico = dict(category)#as product_JSON is a list of dico
 
     if product_dico["products"] < 30 and product_dico["products"] > 20:
-         #list_cate_500.append(product_dico["name"] + ' - ' + product_dico["id"])
-         list_cate_500.append(product_dico["name"])
+        list_category_limited.append(product_dico["name"])
     else:
-         print('skip ' + product_dico["name"] + ' car ' + str(product_dico["products"]))
+        print('skip ' + product_dico["name"] + ' because ' + str(product_dico["products"]) + ' products')
 
 
-print(list_cate_500)##a supprimer
-print(len(list_cate_500))##a supprimer
 
 print('######################')
 ### Connect to the database
 
-
-
-
 connection = DataBaseConnection()
 
-########
+##insertion categories in DB###
+for cat in list_category_limited:
 
+    #categorie = classe_API.Category(cat)#
+    categorie = Category(cat)#
 
+    print('==============')##to monitor in the console
+    print(categorie.name)##to monitor in the console
 
-##insertion des categorie en DB###
-for cat in list_cate_500:
-    #print(cat[0:2])
-    print('==============')
-    categorie = classe_API.category(cat)
-    print(categorie.name)
-
-    #if categorie.lc == 'fr':
-
-
-    #sql_insert = "INSERT into categorie VALUES(NULL,'" + categorie.name + "');"
-    #print(categorie.SQL_insert() + ' je regarde si ca marche')
-
-
-    connection.query_insert(categorie.SQL_insert())
-    #cur.execute(sql_insert)
+    connection.query_insert(categorie.sql_insert())
 
 
 
 
 
 ##################################################
-##recuperation des categories + id (id sont inconnus########
+#####download categories from DB to get IDs#######
+###and to retrieve aliments form those categorie##
+#############from API#############################
 ##################################################
 
-results = connection.fetchalll(categorie.SQL_load())
+results = connection.fetchalll(categorie.sql_load())
 
-print('1111111111111111111111111111111111111111111')
-print(results) # => les categories from DB en liste de tulpe
-print('1111111111111111111111111111111111111111111')
 
 for cat_tulpe in results:
-    r = requests.get('https://fr.openfoodfacts.org/categorie/' + cat_tulpe[1] + '.json')
-    #print(cat_tulpe[1])
-    #print(type(cat_tulpe))
-    return_json_API = r.json()  # get json file
-    product_JSON = return_json_API["products"]
-    #print(type(product_JSON))
-    #print(product_JSON)
+    #name from category tulpe (id, name) and request for aliment for each category
+    request = requests.get('https://fr.openfoodfacts.org/categorie/' + cat_tulpe[1] + '.json')
+    return_json_API = request.json()  # get json file
+    product_JSON = return_json_API["products"] # product_JSON is a list of dico for all aliment
 
-    print('///////////*************************////////////////////*************************/////////////')
+    print('///////////***************/////////////')#to monitor in the console
 
     for product in product_JSON:
         product_dico = dict(product)
-        aliment = classe_API.Aliment(product_dico)
-        #product_name = aliment.product_name
-        #print(product_name)
-        #nutrition_grades = aliment.nutrition_grades
-        #print(nutrition_grades)  # car nutrition_grades pas tjs la
-        #url = aliment.url
-        #print(url)
-        #stores = aliment.stores
-        #print(stores)
-        #print(cat_tulpe[1] + 'categoriiiiiiiiiie')
+        aliment = Aliment(product_dico)
+        #insertion in DB with ID of teh category
+        connection.query_insert(aliment.sql_insert(cat_tulpe[0]))
 
-        #print(aliment.SQL_insert(cat_tulpe[0]))
-
-        connection.query_insert(aliment.SQL_insert(cat_tulpe[0]))
-
-        print('///////////--------------///////////////////-----------------')
-
-
-
+        print('///////////--------------////////////')#to monitor in the console
 
 connection.close()
