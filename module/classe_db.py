@@ -12,10 +12,10 @@ class DataBaseConnection:
         """ connect to the DB with autocommit
         cursor active
         """
-        connection = pymysql.connect(host='localhost', user='root', passwd='sophie', db='OPenFoodFacts', \
+        self.connection = pymysql.connect(host='localhost', user='root', passwd='sophie', db='OpenFoodFacts', \
         use_unicode=True, charset="utf8")
-        connection.autocommit(True)
-        self.cursor = connection.cursor()
+        self.connection.autocommit(True)
+        self.cursor = self.connection.cursor()
         #self.commit = connection.commit()
 
     def fetchalll(self, sql):
@@ -31,3 +31,8 @@ class DataBaseConnection:
         self.cursor.execute(sql)
         #self.commit
         return print('insert## ' + sql + ' ##OK')
+
+    def close_db(self):
+        if self.connection:
+            self.cursor.close()
+            self.connection.close()

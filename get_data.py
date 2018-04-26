@@ -79,4 +79,4 @@ for cat_tulpe in results:
 
         print('///////////--------------////////////')#to monitor in the console
 
-connection.close()
+connection.close_db()

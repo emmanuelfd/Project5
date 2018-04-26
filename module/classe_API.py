@@ -42,7 +42,7 @@ class Aliment:
         if "nutrition_grades" in produit_charge:
             self.nutrition_grades = produit_charge["nutrition_grades"]
         else:
-            self.nutrition_grades = "Unkmown"
+            self.nutrition_grades = "Unknown"
         self.url = produit_charge["url"]
         if "stores" in produit_charge:
             self.stores = produit_charge["stores"].replace("'", '-')
