@@ -18,6 +18,7 @@ class user_input:
 
 
     def check_from_db(self,request_from_db):
+        #check = False
         for element in request_from_db:
             if int(self.choice) in element:
                 check = True

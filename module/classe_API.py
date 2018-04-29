@@ -10,7 +10,7 @@ class Category:
         if exist.
         and handle  apostrophe
         """
-        if categorie[2:3] == ':':
+        if categorie[2:3] == ':': ##how ignore when en: don't want an object to be create when contains en:
             self.name = categorie[3:].replace("'", "''")
             self.modified = 'yes'
         else:

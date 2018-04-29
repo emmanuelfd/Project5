@@ -40,6 +40,7 @@ list_aliment = connection.fetchalll("select * from aliment where IdCategorie=" +
 
 
 print ('##############')
+print(list_aliment)
 
 for x in list_aliment:
     print(str(x[0]) + '##' + str(x[1])) # display in the console

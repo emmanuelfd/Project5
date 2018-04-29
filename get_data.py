@@ -6,8 +6,6 @@ from module.classe_API import Category,Aliment
 
 
 
-page = True
-separator = 20 # page 1 to start
 
 ##connect to openfoodfact to get list of categorie
 ##//fr => will be in french
@@ -27,7 +25,7 @@ for category in product_JSON:
 
     product_dico = dict(category)#as product_JSON is a list of dico
 
-    if product_dico["products"] < 30 and product_dico["products"] > 20:
+    if product_dico["products"] < 15 and product_dico["products"] > 5:
         list_category_limited.append(product_dico["name"])
     else:
         print('skip ' + product_dico["name"] + ' because ' + str(product_dico["products"]) + ' products')
@@ -64,19 +62,39 @@ results = connection.fetchalll(categorie.sql_load())
 
 
 for cat_tulpe in results:
-    #name from category tulpe (id, name) and request for aliment for each category
-    request = requests.get('https://fr.openfoodfacts.org/categorie/' + cat_tulpe[1] + '.json')
-    return_json_API = request.json()  # get json file
-    product_JSON = return_json_API["products"] # product_JSON is a list of dico for all aliment
 
-    print('///////////***************/////////////')#to monitor in the console
 
-    for product in product_JSON:
-        product_dico = dict(product)
-        aliment = Aliment(product_dico)
-        #insertion in DB with ID of teh category
-        connection.query_insert(aliment.sql_insert(cat_tulpe[0]))
+    page = True
+    separator = 1  # page 1 to start
+    while page:
 
-        print('///////////--------------////////////')#to monitor in the console
+
+        request = requests.get('https://fr.openfoodfacts.org/categorie/' + cat_tulpe[1] + '/' + str(separator) + '.json')
+        #old#request = requests.get('https://fr.openfoodfacts.org/categorie/' + cat_tulpe[1] + '.json')
+        return_json_API = request.json()  # get json file
+        product_JSON = return_json_API["products"] # product_JSON is a list of dico for all aliment
+
+        number_produit_total = return_json_API["count"]
+        number_produit_lu = return_json_API["skip"]
+
+        print(str(number_produit_total) + ' count' +'--------' + ' separator is : ' + str(separator))
+
+        if number_produit_lu - number_produit_total >= 0 or separator > 3 or number_produit_total < 20:
+            # end of the list or max 3 pages or less than 20
+            # as 20 is 1 page (avoid extra loop)
+            page = False
+
+
+        print('///////////***************/////////////')#to monitor in the console
+
+        for product in product_JSON:
+            product_dico = dict(product)
+            aliment = Aliment(product_dico)
+            #insertion in DB with ID of the category
+            connection.query_insert(aliment.sql_insert(cat_tulpe[0]))
+
+        print('///////////------end of the batch of insertion--------////////////')#to monitor in the console
+
+        separator += 1 # new page
 
 connection.close_db()
