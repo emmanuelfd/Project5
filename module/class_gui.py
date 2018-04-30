@@ -18,22 +18,24 @@ class user_input:
 
 
     def check_from_db(self,request_from_db):
-        #check = False
-        for element in request_from_db:
-            if int(self.choice) in element:
-                check = True
-                break
-            else:
-                check = False
-        return check
+        check = False
 
-    def check_int(self):
-        checkII = True
-        try:
-            self.choice = int(self.choice)
-        except ValueError:
-            checkII = False
-        return checkII
+        for element in request_from_db:
+            try:
+                if int(self.choice) in element:
+                    check = True
+                    break
+                else:
+                    check = False
+            except ValueError:#false if int() failed - meaning it was not a number
+                check = False
+            if not request_from_db:
+                #in case lit is empty
+                check = True
+
+        return check
+    #UnboundLocalError: local variable 'check' referenced before assignment
+
 
 
 

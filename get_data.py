@@ -25,7 +25,7 @@ for category in product_JSON:
 
     product_dico = dict(category)#as product_JSON is a list of dico
 
-    if product_dico["products"] < 15 and product_dico["products"] > 5:
+    if product_dico["products"] < 15 and product_dico["products"] > 10:
         list_category_limited.append(product_dico["name"])
     else:
         print('skip ' + product_dico["name"] + ' because ' + str(product_dico["products"]) + ' products')
