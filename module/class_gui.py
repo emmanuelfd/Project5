@@ -5,19 +5,29 @@ class user_input:
     """ to be used when working on aliment, loading from API and inserting in DB
     """
     def __init__(self, choice):
+        """ user's choice
+        """
         self.choice = choice
 
 
     @classmethod
     def from_input(cls,table):
+        """ classmethod as this method will be called at the same time
+        as the class
+        """
         return cls(input('saisir le chiffre ' + str(table) + ' : '))
 
     @classmethod
     def from_input_save(cls):
+        """ classmethod as this method will be called at the same time
+        as the class
+        """
         return cls(input('Voulez vous sauver votre recherche Y or N ?'))
 
 
     def check_from_db(self,request_from_db):
+        """ 2 checks - 1 for integer and 1 to make sure id is in the list from db
+        """
         check = False
 
         for element in request_from_db:
@@ -27,7 +37,7 @@ class user_input:
                     break
                 else:
                     check = False
-            except ValueError:#false if int() failed - meaning it was not a number
+            except ValueError:  #false if int() failed - meaning it was not a number
                 check = False
             if not request_from_db:
                 #in case lit is empty
@@ -53,6 +63,8 @@ class aliment_gui:
 
 
     def substitution_prompt(self):
+        """ to display comment about aliment selected
+        """
         if self.nutrition == 'a':
             prompt = 'Rien a dire ceci est un bon aliment. On ne va pas trouver mieux'
         elif self.nutrition == 'b':
@@ -70,6 +82,8 @@ class aliment_gui:
 
 
     def substitution_aliment(self, list_aliment):
+        """ look for a substitution. New nutrition must be better than the selected one and not unknown
+        """
         for x in list_aliment:
 #            if str(x[2]) < self.nutrition and str(x[2]) == "a":
             if str(x[2]) < self.nutrition and str(x[2]) != "Unkmown":

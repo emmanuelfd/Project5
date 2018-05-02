@@ -32,7 +32,6 @@ for category in product_JSON:
 
 
 
-print('######################')
 ### Connect to the database
 
 connection = DataBaseConnection()
@@ -70,7 +69,6 @@ for cat_tulpe in results:
 
 
         request = requests.get('https://fr.openfoodfacts.org/categorie/' + cat_tulpe[1] + '/' + str(separator) + '.json')
-        #old#request = requests.get('https://fr.openfoodfacts.org/categorie/' + cat_tulpe[1] + '.json')
         return_json_API = request.json()  # get json file
         product_JSON = return_json_API["products"] # product_JSON is a list of dico for all aliment
 
@@ -83,9 +81,6 @@ for cat_tulpe in results:
             # end of the list or max 3 pages or less than 20
             # as 20 is 1 page (avoid extra loop)
             page = False
-
-
-        print('///////////***************/////////////')#to monitor in the console
 
         for product in product_JSON:
             product_dico = dict(product)
